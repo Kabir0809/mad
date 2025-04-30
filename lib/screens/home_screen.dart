@@ -5,9 +5,37 @@ import '../providers/card_provider.dart';
 import '../models/loyalty_card.dart';
 import 'add_card_screen.dart';
 import 'card_detail_screen.dart';
+import '../services/auth_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final _authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<CardProvider>(context, listen: false).loadCards();
+    });
+  }
+
+  Future<void> _signOut() async {
+    try {
+      await _authService.signOut(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +47,8 @@ class HomeScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: Implement search functionality
-            },
+            icon: const Icon(Icons.logout),
+            onPressed: _signOut,
           ),
         ],
       ),
@@ -42,42 +68,27 @@ class HomeScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.credit_card,
-                      size: 64,
+                      size: 48,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'No Loyalty Cards Yet',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    'No Loyalty Cards',
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Add your first loyalty card to get started',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
+                  const Text('Add your first loyalty card to get started'),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AddCardScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: () => Navigator.pushNamed(context, '/add'),
                     icon: const Icon(Icons.add),
-                    label: const Text('Add First Card'),
+                    label: const Text('Add Card'),
                   ),
                 ],
               ),
@@ -91,102 +102,26 @@ class HomeScreen extends StatelessWidget {
               itemCount: cardProvider.cards.length,
               itemBuilder: (context, index) {
                 final card = cardProvider.cards[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Card(
-                    child: Slidable(
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) {
-                              cardProvider.deleteCard(card.id);
-                            },
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: 'Delete',
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(16),
-                              bottomRight: Radius.circular(16),
-                            ),
-                          ),
-                        ],
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: card.cardColor ?? Theme.of(context).colorScheme.primary,
+                      child: Text(
+                        card.name.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(color: Colors.white),
                       ),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CardDetailScreen(card: card),
-                            ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: card.cardColor ?? Theme.of(context).colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    card.name[0].toUpperCase(),
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      card.name,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      card.cardNumber,
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                    if (card.expiryDate != null) ...[
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Expires: ${card.expiryDate!.day}/${card.expiryDate!.month}/${card.expiryDate!.year}',
-                                        style: TextStyle(
-                                          color: card.expiryDate!.isBefore(DateTime.now())
-                                              ? Colors.red
-                                              : Colors.grey[600],
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                              Icon(
-                                Icons.chevron_right,
-                                color: Colors.grey[400],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    ),
+                    title: Text(
+                      card.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(card.cardNumber),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      '/detail',
+                      arguments: card,
                     ),
                   ),
                 );
@@ -196,18 +131,9 @@ class HomeScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddCardScreen(),
-            ),
-          );
-        },
+        onPressed: () => Navigator.pushNamed(context, '/add'),
         icon: const Icon(Icons.add),
         label: const Text('Add Card'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
       ),
     );
   }

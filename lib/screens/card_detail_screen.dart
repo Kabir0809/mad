@@ -48,7 +48,9 @@ class CardDetailScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           image: DecorationImage(
-                            image: FileImage(File(card.imagePath!)),
+                            image: card.imagePath!.startsWith('http')
+                                ? NetworkImage(card.imagePath!)
+                                : FileImage(File(card.imagePath!)) as ImageProvider,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -72,10 +74,15 @@ class CardDetailScreen extends StatelessWidget {
                                         child: Stack(
                                           children: [
                                             InteractiveViewer(
-                                              child: Image.file(
-                                                File(card.imagePath!),
-                                                fit: BoxFit.contain,
-                                              ),
+                                              child: card.imagePath!.startsWith('http')
+                                                  ? Image.network(
+                                                      card.imagePath!,
+                                                      fit: BoxFit.contain,
+                                                    )
+                                                  : Image.file(
+                                                      File(card.imagePath!),
+                                                      fit: BoxFit.contain,
+                                                    ),
                                             ),
                                             Positioned(
                                               top: 8,
