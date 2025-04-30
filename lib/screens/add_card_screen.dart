@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+// import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'dart:math';

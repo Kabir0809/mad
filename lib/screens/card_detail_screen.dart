@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
-import '../providers/card_provider.dart';
+// import '../providers/card_provider.dart';
 import '../models/loyalty_card.dart';
 
 class CardDetailScreen extends StatelessWidget {

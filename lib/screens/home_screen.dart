@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../providers/card_provider.dart';
-import '../models/loyalty_card.dart';
-import 'add_card_screen.dart';
-import 'card_detail_screen.dart';
+// import '../models/loyalty_card.dart';
+// import 'add_card_screen.dart';
+// import 'card_detail_screen.dart';
 import '../services/auth_service.dart';
 import 'profile_screen.dart';
 
