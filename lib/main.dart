@@ -7,6 +7,7 @@ import 'screens/home_screen.dart';
 import 'screens/add_card_screen.dart';
 import 'screens/card_detail_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/profile_screen.dart';
 import 'providers/card_provider.dart';
 import 'services/auth_service.dart';
 import 'models/loyalty_card.dart';
@@ -44,40 +45,112 @@ class MyApp extends StatelessWidget {
       create: (context) => CardProvider(),
       child: MaterialApp(
         title: 'Loyalty Card App',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2196F3)),
+      theme: ThemeData(
           useMaterial3: true,
-          cardTheme: const CardTheme(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF2196F3),
+            brightness: Brightness.light,
+          ),
+          cardTheme: CardTheme(
             elevation: 2,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: BorderRadius.circular(16),
             ),
+            clipBehavior: Clip.antiAlias,
           ),
           appBarTheme: const AppBarTheme(
             centerTitle: true,
             elevation: 0,
           ),
           inputDecorationTheme: InputDecorationTheme(
+            filled: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
             ),
-            filled: true,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              elevation: 0,
             ),
           ),
         ),
+        darkTheme: ThemeData(
+        useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF2196F3),
+            brightness: Brightness.dark,
+          ),
+          cardTheme: CardTheme(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            clipBehavior: Clip.antiAlias,
+          ),
+          appBarTheme: const AppBarTheme(
+            centerTitle: true,
+            elevation: 0,
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+          ),
+        ),
+        themeMode: ThemeMode.system, // Will follow system theme
         initialRoute: '/',
         routes: {
           '/': (context) => const AuthWrapper(),
           '/login': (context) => const LoginScreen(),
           '/home': (context) => const HomeScreen(),
           '/add': (context) => const AddCardScreen(),
+          '/profile': (context) => const ProfileScreen(),
           '/detail': (context) {
             final card = ModalRoute.of(context)!.settings.arguments as LoyaltyCard;
             return CardDetailScreen(card: card);
@@ -100,7 +173,7 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
+      body: Center(
               child: CircularProgressIndicator(),
             ),
           );

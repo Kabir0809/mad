@@ -6,6 +6,7 @@ import '../models/loyalty_card.dart';
 import 'add_card_screen.dart';
 import 'card_detail_screen.dart';
 import '../services/auth_service.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _authService = AuthService();
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -39,6 +41,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      _buildHomeContent(),
+      const ProfileScreen(),
+    ];
+
+    return Scaffold(
+      body: screens[_selectedIndex],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: () => Navigator.pushNamed(context, '/add'),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Card'),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildHomeContent() {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -102,26 +142,59 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: cardProvider.cards.length,
               itemBuilder: (context, index) {
                 final card = cardProvider.cards[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: card.cardColor ?? Theme.of(context).colorScheme.primary,
-                      child: Text(
-                        card.name.substring(0, 1).toUpperCase(),
-                        style: const TextStyle(color: Colors.white),
+                return Slidable(
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (_) async {
+                          await cardProvider.deleteCard(card.id);
+                        },
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
                       ),
-                    ),
-                    title: Text(
-                      card.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(card.cardNumber),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      '/detail',
-                      arguments: card,
+                    ],
+                  ),
+                  child: Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ListTile(
+                      leading: Hero(
+                        tag: 'avatar_${card.id}',
+                        child: CircleAvatar(
+                          backgroundColor: card.cardColor ?? Theme.of(context).colorScheme.primary,
+                          child: Text(
+                            card.name.substring(0, 1).toUpperCase(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        card.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(card.cardNumber),
+                          if (card.expiryDate != null)
+                            Text(
+                              'Expires: ${card.expiryDate!.toString().split(' ')[0]}',
+                              style: TextStyle(
+                                color: card.expiryDate!.isBefore(DateTime.now())
+                                    ? Colors.red
+                                    : null,
+                              ),
+                            ),
+                        ],
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        '/detail',
+                        arguments: card,
+                      ),
                     ),
                   ),
                 );
@@ -129,11 +202,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.pushNamed(context, '/add'),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Card'),
       ),
     );
   }
